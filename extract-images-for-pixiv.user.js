@@ -8,54 +8,10 @@
 // @version     0.0.1
 // @icon        http://www.pixiv.net/favicon.ico
 // @grant       GM_setClipboard
+// @grant       GM_xmlhttpRequest
 // @license     MPL
 // ==/UserScript==
 (function () {
-	// AJAX lib
-	var AJAX_FINISHED           =  0;
-	var AJAX_NO_BROWSER_SUPPORT = -1;
-	var AJAX_STARTING           = -2;
-	var AJAX_PARTIAL_PROGRESS   = -3;
-	var AJAX_FAILED             = -4;
-	var getXHR = function () {
-		var xhr = false;
-		if (window.XMLHttpRequest) {
-			xhr = new XMLHttpRequest();
-		}
-		if (!xhr) {
-			return false;
-		}
-		return xhr;
-	};
-
-	var makeRequest = function (url, requestType, payload, callback) {
-		if (typeof callback !== "function") {
-			alert("说好的回调呢 ٩͡[๏̯͡๏]");
-			return false;
-		}
-		var xhr = getXHR();
-		if (xhr) {
-			xhr.onreadystatechange = function () {
-				if (xhr.readyState == 4) {
-					if (xhr.status == 200) {
-						callback(xhr, AJAX_FINISHED);
-					} else {
-						callback(xhr, AJAX_FAILED);
-					}
-				}
-			};
-			xhr.open(requestType, url, true);
-			if (requestType == "POST") {
-				xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded;");
-			}
-			xhr.send(payload);
-			callback(xhr, AJAX_STARTING);
-		} else {
-			callback(xhr, AJAX_NO_BROWSER_SUPPORT);
-		}
-		return xhr;
-	};
-
 	// 移除分享按钮
 	var removeShareButton = function () {
 		var share_button = document.getElementsByClassName('share-button')[0];
@@ -120,30 +76,35 @@
 				var targetPagePattern = window.location.href.replace(/medium/, "manga_big") + "&page=";
 				var targetPage = [];
 				var imageUrls = [];
-				var parsedCounts = 0;
-				var parseRespond = function (xhr, status) {
-					if (xhr){
-						if (AJAX_FINISHED === status) {
-							var imageUrl = extractSingle(xhr.response);
-							if (null !== imageUrl) {
-								imageUrls.push(imageUrl);
-							}
-							parsedCounts++;
-						} else if (AJAX_FAILED === status) {
-							parsedCounts++;
+				var parsedPages = 0;
+				var parseRespond = function (xhr) {
+					if (xhr) {
+						var imageUrl = extractSingle(xhr.response);
+						if (null !== imageUrl) {
+							imageUrls.push(imageUrl);
 						}
-						if (num === parsedCounts) {
+						parsedPages++;
+						if (num === parsedPages) {
 							document.getElementById("extracted").innerHTML = "搞到这 " + illustType + " 张图啦 （⺻▽⺻ ）";
 							GM_setClipboard(imageUrls.sort().join("\r\n"));
 						}
 					}
 				};
+				var xhrErrorHandler = function (xhr) {
+					parsedPages++;
+				};
+
 				for (var i = 0; i < num; i++) {
 					targetPage.push(targetPagePattern + i);
 				}
 				targetPage = onUnique(targetPage);
 				for (var j = 0; j < targetPage.length; j++) {
-					makeRequest(targetPage[j], "GET", null, parseRespond);
+					GM_xmlhttpRequest({
+						method:  'GET',
+						url:     targetPage[j],
+						onload:  parseRespond,
+						onerror: xhrErrorHandler
+					});
 				}
 				return targetPage.length;
 			};
