@@ -5,7 +5,7 @@
 // @description Adds a button that get all attached images as original size to every post.
 // @include     http://www.pixiv.net/member_illust.php*
 // @author      cmheia
-// @version     1.0.1
+// @version     1.0.2
 // @icon        http://www.pixiv.net/favicon.ico
 // @grant       GM_setClipboard
 // @grant       GM_xmlhttpRequest
@@ -335,7 +335,7 @@
 
 	// 创建样式表
 	var addStyle = function () {
-		apendStyle(".cmheia_checkbox {position:absolute;left:0;} .cmheia_item {padding:1px 1px 7px;} .cmheia_item_selected {background-color:pink;}");
+		apendStyle(".cmheia_checkbox {position:absolute;left:0;} .cmheia_item {padding:1px 1px 7px;} .cmheia_item_unselect {background-color:pink;}");
 	};
 
 	// 作品目录？
@@ -451,6 +451,7 @@
 		if (itemList) {
 			for (i = 0; i < itemList.length; i++) {
 				itemList[i].children[0].children[0].children[1].checked = !0;
+				removeClassName(itemList[i].children[0], 'cmheia_item_unselect');
 			}
 		}
 		// console.groupEnd();
@@ -466,6 +467,7 @@
 			for (i = 0; i < itemList.length; i++) {
 				var x = itemList[i].children[0].children[0].children[1].checked;
 				itemList[i].children[0].children[0].children[1].checked = !x;
+				toggleClassName(itemList[i].children[0], 'cmheia_item_unselect');
 			}
 		}
 		// console.groupEnd();
@@ -693,14 +695,14 @@
 				// 增加背景
 				itemList[0].children[i].children[0].setAttribute('style', 'margin-bottom:0;');
 				addClassName(itemList[0].children[i].children[0], 'cmheia_item');
-				// addClassName(itemList[0].children[i].children[0], 'cmheia_item_selected');
+				// addClassName(itemList[0].children[i].children[0], 'cmheia_item_unselect');
 				// div
 				// 增加点击事件
 				itemList[0].children[i].children[0].children[0].appendChild(button);
 				itemList[0].children[i].children[0].children[0].addEventListener("click", function (e) {
 					// 点击图片切换选中状态
 					this.children[1].checked = !this.children[1].checked;
-					toggleClassName(this.parentNode, 'cmheia_item_selected');
+					toggleClassName(this.parentNode, 'cmheia_item_unselect');
 				});
 			}
 		}
