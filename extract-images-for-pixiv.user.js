@@ -5,7 +5,7 @@
 // @description Adds a button that get all attached images as original size to every post.
 // @include     http://www.pixiv.net/member_illust.php*
 // @author      cmheia
-// @version     1.0.0
+// @version     1.0.1
 // @icon        http://www.pixiv.net/favicon.ico
 // @grant       GM_setClipboard
 // @grant       GM_xmlhttpRequest
@@ -256,7 +256,7 @@
 			j,
 			working = false;
 
-			// console.group("lopop illust[]");
+			// console.group("loop illust[]");
 			for (i = 0; i < this.illust.length && !working; i++) {
 				// console.log("illust[", i, "]: id =", this.illust[i].id, ", final.length =", this.illust[i].final.length);
 				if (0 === this.illust[i].final.length) {
@@ -520,12 +520,12 @@
 			// 单图
 			result[0] = imgTag[1];
 			// console.debug("单图", result);
-		} else if (html.indexOf("multiple") && (imgTag = html.match(/<ul class=\"meta\"><li>[^<>]*<\/li><li>[^<>]*(\d+)P<\/li>/)) && imgTag && imgTag[1]) {
+		} else if (html.indexOf("multiple") && (imgTag = html.match(/<ul class=\"meta\"><li>[^<>]*<\/li><li>[^<>\d]*(\d+)P<\/li>/)) && imgTag && imgTag[1]) {
 			// 多图
 			// http://www.pixiv.net/member_illust.php?mode=manga_big&illust_id=xxxxxxxx&page=0
 			result.push(parseInt(imgTag[1]));
 			result.push(url.replace(/medium/, "manga_big") + "&page=");
-			// console.debug("多图", result);
+			// console.debug("多图", result, imgTag);
 		} else if (html.indexOf("ugoira_view") && (imgTag = html.match(/pixiv\.context\.ugokuIllustFullscreenData[\s]*=[\s]*\{[\s]*\"src\"[\s]*:[\s]*\"((http|https):[\\\/]*[\w\d\.]*pixiv\.net(.*)\/(\d+)_ugoira(\d+)x(\d+)\.zip)\",/)) && imgTag && imgTag[1]) {
 			// 动图
 			// http://www.pixiv.net/member_illust.php?mode=medium&illust_id=xxxxxxxx
@@ -594,6 +594,7 @@
 				// console.group("得到页面", illustId, ", 开始解析", illustId == xhr.finalUrl.replace(/.*illust_id=(\d+).*/, "$1"));
 				progress++;
 				msg("进度" + progress + "/" + url.length + " (ฅ´ω`ฅ)");
+				// console.warn("进度" + progress + "/" + url.length + " (ฅ´ω`ฅ)");
 
 				if (200 === xhr.status) {
 					// 解析页面取得原图链接(单图和动图)或新的目标页面链接(多图)
