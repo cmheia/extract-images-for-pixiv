@@ -5,29 +5,32 @@
 // @description Adds a button that get all attached images as original size to every post.
 // @include     http://www.pixiv.net/member_illust.php*
 // @author      cmheia
-// @version     1.0.2
+// @version     1.1.0
 // @icon        http://www.pixiv.net/favicon.ico
 // @grant       GM_setClipboard
 // @grant       GM_xmlhttpRequest
 // @license     MPL
 // ==/UserScript==
 (function () {
+	'use strict';
 	/**********************************************************************
 	 * 长得像库
 	 **********************************************************************/
 	var $id = function (o) {
-		return document.getElementById(o);
+		// return document.getElementById(o);
+		return document.querySelector(`#${o}`);
 	};
 
 	var $class = function (o) {
-		return document.getElementsByClassName(o);
+		// return document.getElementsByClassName(o);
+		return document.querySelector(`.${o}`);
 	};
 
 	// 去重
 	var unique = function (arr) {
 		var result = [],
 		hash = {};
-		for (var i = 0, elem; (elem = arr[i]) !== undefined; i++) {
+		for (let i = 0, elem; (elem = arr[i]) !== undefined; i++) {
 			if (!hash[elem]) {
 				result.push(elem);
 				hash[elem] = true;
@@ -97,7 +100,7 @@
 
 		function tergetContainer() {
 			// illust_id
-			this.id = -1;
+			this.id = "-1";
 			// 取得的原图链接
 			this.result = [];
 			// 最终的原图链接,1 -> yes,0 -> no,-1 -> failed
@@ -108,12 +111,11 @@
 
 		// 删除重复目标
 		this.shrinkTarget = function () {
-			var i,
-			elem,
+			var elem,
 			hash = {},
 			duplicate = [];
 			// 第一步：找出需要删除的重复 id
-			for (i = 0; (elem = this.illust[i]) !== undefined; i++) {
+			for (let i = 0; (elem = this.illust[i]) !== undefined; i++) {
 				if (hash[elem.id]) {
 					duplicate.push(i); // 重复
 				} else {
@@ -121,7 +123,7 @@
 				}
 			}
 			// 第二步：删除的重复 id
-			for (i = duplicate.length - 1; i >= 0; i--) {
+			for (let i = duplicate.length - 1; i >= 0; i--) {
 				this.illust.splice(duplicate[i], 1);
 			}
 			// console.log("删除重复 id", duplicate.length, "个");
@@ -157,11 +159,10 @@
 		// type: true -> target is id; false -> target is index (default)
 		this.removeTarget = function (target, type) {
 			// console.group("removeTarget", target, type);
-			var i,
-			index = -1;
+			var index = -1;
 
 			if (type) {
-				for (i = 0; i < this.illust.length; i++) {
+				for (let i = 0; i < this.illust.length; i++) {
 					if (target === this.illust[i].id) {
 						index = i;
 						break;
@@ -181,13 +182,12 @@
 		// type: true -> target is index; false -> target is id (default)
 		this.recordTargetLength = function (target, count, type) {
 			// console.group("recordTargetLength", target, count, type);
-			var i,
-			index = -1;
+			var index = -1;
 
 			if (type && this.illust[target] && this.illust[target].id) {
 				index = target;
 			} else {
-				for (i = 0; i < this.illust.length; i++) {
+				for (let i = 0; i < this.illust.length; i++) {
 					if (target === this.illust[i].id) {
 						index = i;
 						break;
@@ -217,14 +217,13 @@
 		// type: true -> target is index; false -> target is id (default)
 		this.setTarget = function (target, content, offset, status, type) {
 			// console.group("setTarget", target, content, offset, status, type);
-			var i,
-			index = -1,
+			var index = -1,
 			result = false;
 
 			if (type && this.illust[target] && this.illust[target].id) {
 				index = target;
 			} else {
-				for (i = 0; i < this.illust.length; i++) {
+				for (let i = 0; i < this.illust.length; i++) {
 					if (target === this.illust[i].id) {
 						index = i;
 						break;
@@ -252,19 +251,17 @@
 		// 遍历所有 final, 发现 0 即为未完成
 		this.isAllDone = function () {
 			// console.group("isAllDone", this.illust.length);
-			var i,
-			j,
-			working = false;
+			var working = false;
 
 			// console.group("loop illust[]");
-			for (i = 0; i < this.illust.length && !working; i++) {
+			for (let i = 0; i < this.illust.length && !working; i++) {
 				// console.log("illust[", i, "]: id =", this.illust[i].id, ", final.length =", this.illust[i].final.length);
 				if (0 === this.illust[i].final.length) {
 					working = true;
 					// console.warn("final.length=0, 即还未记录结果, 属未完成");
 					break;
 				}
-				for (j = 0; j < this.illust[i].final.length && !working; j++) {
+				for (let j = 0; j < this.illust[i].final.length && !working; j++) {
 					// console.log("\tfinal[", j, "] =", this.illust[i].final[j]);
 					if (0 === this.illust[i].final[j]) {
 						working = true;
@@ -286,15 +283,14 @@
 		// 导出结果
 		this.exportAll = function () {
 			// console.group("exportAll");
-			var i,
-			j,
+			var j,
 			k,
 			total = 0,
 			failed = new Array(this.illust.length),
 			src = [],
 			result = {};
 
-			for (i = 0; i < this.illust.length; i++) {
+			for (let i = 0; i < this.illust.length; i++) {
 				for (j = 0, k = 0; j < this.illust[i].final.length; j++) {
 					if (1 === this.illust[i].final[j]) {
 						src[total++] = this.illust[i].result[j];
@@ -314,10 +310,9 @@
 		// 导出 ID
 		this.getID = function () {
 			// console.group("getID");
-			var i,
-			result = [];
+			var result = [];
 
-			for (i = 0; i < this.illust.length; i++) {
+			for (let i = 0; i < this.illust.length; i++) {
 				result[i] = this.illust[i].id;
 			}
 			// console.groupEnd();
@@ -339,18 +334,28 @@
 	};
 
 	// 作品目录？
+	// 综合
+	// http://www.pixiv.net/member_illust.php?id=xxxxxxxx
+	// 插画
+	// http://www.pixiv.net/member_illust.php?type=illust&id=xxxxxxxx
+	// 漫画
+	// http://www.pixiv.net/member_illust.php?type=manga&id=xxxxxxxx
+	// 动图
+	// http://www.pixiv.net/member_illust.php?type=ugoira&id=xxxxxxxx
+	// 小说
+	// http://www.pixiv.net/novel/member.php?id=xxxxxxxx
 	var isWorksList = function () {
 		// console.group('页面类型');
 		var userId,
 		workId;
 
-		userId = window.location.search.match(/\?id=(\d+)/);
-		workId = window.location.search.match(/\&illust_id=(\d+)/);
+		userId = window.location.search.match(/[^_]id=(\d+)/);
+		workId = window.location.search.match(/illust_id=(\d+)/);
 		if (userId) {
-			// console.log("作品目录,USER ID:", userId[1]);
+			console.debug("作品目录,USER ID:", userId[1]);
 		}
 		if (workId) {
-			// console.log("作品页面,WORK ID:", workId[1]);
+			console.debug("作品页面,WORK ID:", workId[1]);
 		}
 		// console.groupEnd();
 		return null !== userId && null === workId;
@@ -366,24 +371,28 @@
 	};
 
 	// 提取多图页面原图链接
-	var parseMultiImageUrl = function (num, target, callback) {
-		// console.group("parseMultiImageUrl", num, target);
-		// console.log(callback);
-		var i,
+	var parseMultiImageUrl = function (target, callback) {
+		// console.group("parseMultiImageUrl", target);
+		var num = target.length,
 		parsed = 0,
 		result = {};
+		var referer = target[0].replace(/big/, "medium");
+		// console.warn('Referer :', referer);
 
 		result.done = new Array(num);
 		result.fail = new Array(num);
-		for (i = 0; i < num; i++) {
-			// console.log(target + i);
+		for (let i = 0; i < num; i++) {
+			// console.log(target[i]);
 			// 下面闭包的 index 无实际必要,
 			// xhr.finalUrl.replace(/.*(page=\d+)/, "$1") 可取得相同的值,
 			// 然而
 			// 听说闭包很深奥,那就多练练
 			GM_xmlhttpRequest({
 				method : 'GET',
-				url    : target + i,
+				url    : target[i],
+				headers: {
+					'Referer': referer
+				},
 				onload : (function (xhr) {
 					var index = i;
 					return function (xhr) {
@@ -422,15 +431,13 @@
 	// 解析详情页链接
 	var extractIllustUrl = function () {
 		// console.group("extractIllustUrl");
-		var i,
-		href,
-		id = [],
-		itemList = $class("_image-items")[0].children;
+		var id = [],
+		itemList = $class('_image-items').children;
 
 		if (itemList) {
-			for (i = 0; i < itemList.length; i++) {
+			for (let i = 0; i < itemList.length; i++) {
 				if (itemList[i].children[0].children[0].children[1].checked) {
-					href = itemList[i].children[1].getAttribute('href');
+					let href = itemList[i].children[1].getAttribute('href');
 					if (href && href.match(/.*illust_id=(\d+).*/)) {
 						// id.push(href.replace(/.*illust_id=(\d+).*/, "$1") || "");
 						id.push(href);
@@ -438,6 +445,7 @@
 				}
 			}
 		}
+		// console.log(id);
 		// console.groupEnd();
 		return id;
 	};
@@ -445,11 +453,10 @@
 	// 选中全部图片
 	var ctrlSelectAll = function () {
 		// console.group("ctrlSelectAll");
-		var i,
-		itemList = $class("_image-items")[0].children;
+		var itemList = $class('_image-items').children;
 
 		if (itemList) {
-			for (i = 0; i < itemList.length; i++) {
+			for (let i = 0; i < itemList.length; i++) {
 				itemList[i].children[0].children[0].children[1].checked = !0;
 				removeClassName(itemList[i].children[0], 'cmheia_item_unselect');
 			}
@@ -460,12 +467,11 @@
 	// 反选
 	var ctrlSelectInvert = function () {
 		// console.group("ctrlSelectInvert");
-		var i,
-		itemList = $class("_image-items")[0].children;
+		var itemList = $class('_image-items').children;
 
 		if (itemList) {
-			for (i = 0; i < itemList.length; i++) {
-				var x = itemList[i].children[0].children[0].children[1].checked;
+			for (let i = 0; i < itemList.length; i++) {
+				let x = itemList[i].children[0].children[0].children[1].checked;
 				itemList[i].children[0].children[0].children[1].checked = !x;
 				toggleClassName(itemList[i].children[0], 'cmheia_item_unselect');
 			}
@@ -474,17 +480,20 @@
 	};
 
 	// 提取指定页面
-	var fetchPageContent = function (arr, prefix, onload, onerror) {
+	var fetchPageContent = function (arr, prefix, onload, onerror, referer) {
 		// console.group('fetchPageContent');
-		var i;
+		// console.warn('Referer :', referer);
 
-		for (i = 0; i < arr.length; i++) {
+		for (let i of arr) {
 			// 听说闭包很深奥,那就多练练
-			var target = arr[i].replace(/.*illust_id=(\d+).*/, "$1");
-			// console.log(target);
+			var target = i.replace(/.*illust_id=(\d+).*/, "$1");
+			// console.log(prefix + i);
 			GM_xmlhttpRequest({
 				method : 'GET',
-				url    : prefix + arr[i],
+				url    : prefix + i,
+				headers: {
+					'Referer': referer
+				},
 				onload : (function (xhr) {
 					var id = target;
 					return function (xhr) {
@@ -513,26 +522,129 @@
 	// 				 -> html 中包含字符串 "ugoira_view"
 	var parseWorkPage = function (html, url) {
 		// console.group("parseWorkPage");
-		var i,
-		imgTag,
-		result = [];
+		// 2016-07-18 更新特征：
+		// 		单图 -> 原图链接(57565823);
+		// 				 -> html 中包含字符串 "original-image"
+		// 				 -> document.querySelector('.works_display').innerHTML.indexOf('manga') === -1
+		// 				 -> html 中仅字符串 "manga" 仅出现一次 <meta name="keywords" content="pixiv,插画,漫画,manga,社区,SNS投稿,比赛">
+		// 				 -> 即 XMLHttpRequest.responseText.match(/manga/gi).length === 1
+		// 		多图 -> 包含原图的目标页面链接(第二个参数为此而生)(56207143);
+		// 				 -> html 中包含字符串 "multiple"
+		// 				 -> html 中仅字符串 "manga" 仅出现一次 <meta name="keywords" content="pixiv,插画,漫画,manga,社区,SNS投稿,比赛">
+		// 				 -> document.querySelector('.works_display').innerHTML.indexOf('manga') !== -1
+		// 				 -> 即 XMLHttpRequest.responseText.match(/manga/gi).length > 1
+		// 		动图 -> 原图压缩包链接(44588377,56083603)(动图仅包含单个 zip , 使用与单图相同的方法处理)
+		// 				 -> html 中包含字符串 "ugoira_view"
+		// 				 -> document.querySelector('.works_display').innerHTML.indexOf('manga') === -1
+		// 				 -> html 中仅字符串 "manga" 仅出现一次 <meta name="keywords" content="pixiv,插画,漫画,manga,社区,SNS投稿,比赛">
+		// 				 -> 即 XMLHttpRequest.responseText.match(/manga/gi).length === 1
 
-		imgTag = html.match(/<img\s+alt=\"[^\"]*\".*data-src=\"([^\"]*)\".*class=\"original-image\">/);
-		if (imgTag && imgTag[1]) {
-			// 单图
-			result[0] = imgTag[1];
-			// console.debug("单图", result);
-		} else if (html.indexOf("multiple") && (imgTag = html.match(/<ul class=\"meta\"><li>[^<>]*<\/li><li>[^<>\d]*(\d+)P<\/li>/)) && imgTag && imgTag[1]) {
-			// 多图
-			// http://www.pixiv.net/member_illust.php?mode=manga_big&illust_id=xxxxxxxx&page=0
-			result.push(parseInt(imgTag[1]));
-			result.push(url.replace(/medium/, "manga_big") + "&page=");
-			// console.debug("多图", result, imgTag);
-		} else if (html.indexOf("ugoira_view") && (imgTag = html.match(/pixiv\.context\.ugokuIllustFullscreenData[\s]*=[\s]*\{[\s]*\"src\"[\s]*:[\s]*\"((http|https):[\\\/]*[\w\d\.]*pixiv\.net(.*)\/(\d+)_ugoira(\d+)x(\d+)\.zip)\",/)) && imgTag && imgTag[1]) {
-			// 动图
-			// http://www.pixiv.net/member_illust.php?mode=medium&illust_id=xxxxxxxx
-			result[0] = imgTag[1].replace(/\\(.)/gi, '$1');
-			// console.debug("动图", result[0]);
+		// 实例：
+		// 		单图
+		// 				<div class="works_display"><div class="_layout-thumbnail ui-modal-trigger"><img src="http://i1.pixiv.net/c/600x600/img-master/img/2015/01/23/12/29/40/xxxxxxxx_p0_master1200.jpg" alt="Верный"></div></div>
+		// 		多图（伪）
+		// 				<div class="works_display"><a href="member_illust.php?mode=big&amp;illust_id=xxxxxxxx" target="_blank" class=" _work manga "><div class="_layout-thumbnail"><img src="http://i3.pixiv.net/c/600x600/img-master/img/2015/11/13/20/05/08/xxxxxxxx_p0_master1200.jpg" alt="COMITIA114"></div></a></div>
+		// 		多图（真）
+		// 				<div class="works_display"><a href="member_illust.php?mode=manga&amp;illust_id=xxxxxxxx" target="_blank" class=" _work multiple "><div class="_layout-thumbnail"><div class="multiple"><i class="_icon-20 _icon-files"></i></div><img src="http://i3.pixiv.net/c/600x600/img-master/img/2016/07/15/20/47/58/xxxxxxxx_p0_master1200.jpg" alt="シャロ生誕祭"></div></a></div>
+		// 		动图
+		// 				<div class="works_display"><div class="_ugoku-illust-player-container ready playing"><div class="wrapper"><div class="_spinner"></div><div class="player toggle"><canvas width="477.326968973747" height="600" style="width: 477.327px; height: 600px;"></canvas></div><a href="/member_illust.php?mode=ugoira_view&amp;illust_id=xxxxxxxx" target="_blank" class="full-screen _ui-tooltip" data-tooltip="全屏显示"><img src="http://source.pixiv.net/www/images/ugoku-illust/full-screen.png?2" width="20" height="20"></a></div></div><div class="_full-screen-container"><div class="_ugoku-illust-player-container"><div class="wrapper toggle"><div class="_spinner"></div><div class="player"></div></div><div class="exit-full-screen"><img src="http://source.pixiv.net/www/images/ugoku-illust/exit-full-screen.png" width="30" height="30"></div></div></div></div>
+
+		// 对应正则：
+		// 		/<div[^<>]*class=\"works_display\">[^<>]*<(\w*)[^<>]*class=\"([\w\s\-\_]*)\"[^<>]*>/
+		// 		/<div[^<>]*class[^<>]*=[^<>]*\"[^<>]*works_display[^<>]*\">[^<>]*<(\w*)[^<>]*class[^<>]*=[^<>]*\"([\w\s\-\_]*)\"[^<>]*>/
+
+		// 上述实例 match 结果：
+		// 		单图
+		// 				["<div class="works_display"><div class="_layout-thumbnail ui-modal-trigger">", "div", "_layout-thumbnail ui-modal-trigger"]
+		// 		多图（伪）
+		// 				["<div class="works_display"><a href="member_illust.php?mode=big&amp;illust_id=xxxxxxxx" target="_blank" class=" _work manga ">", "a", " _work manga "]
+		// 		多图（真）
+		// 				["<div class="works_display"><a href="member_illust.php?mode=manga&amp;illust_id=xxxxxxxx" target="_blank" class=" _work multiple ">", "a", " _work multiple "]
+		// 		动图
+		// 				["<div class="works_display"><div class="_ugoku-illust-player-container ready playing">", "div", "_ugoku-illust-player-container ready playing"]
+		var result = [],
+		target = html.match(/<div[^<>]*class=\"works_display\">[^<>]*<(\w*)[^<>]*class=\"([\w\s\-\_]*)\"[^<>]*>/);
+
+		if (target && 3 === target.length) {
+			// 先尝试用类名判断
+			if (-1 !== target[2].indexOf("trigger")) {
+				// 单图
+				target = html.match(/<img\s+alt=\"[^\"]*\".*data-src=\"([^\"]*)\".*class=\"original-image\">/);
+				if (target && target[1]) {
+					result.push(target[1]);
+				}
+				console.debug("单图", result);
+				// console.log(target);
+			} else if (-1 !== target[2].indexOf("multiple")) {
+				// 多图（真）
+				target = html.match(/<ul class=\"meta\"><li>[^<>]*<\/li><li>[^<>\d]*(\d+)P<\/li>/);
+				if (target && target[1]) {
+					let count = parseInt(target[1]);
+					result.push(count);
+					for (let i = 0; i < count; i++) {
+						let link = url.replace(/medium/, "manga_big");
+						link = `${link}&page=${i}`;
+						result.push(link);
+					}
+				}
+				console.debug("多图（真）", result);
+				// console.log(target);
+			} else if (-1 !== target[2].indexOf("_ugoku")) {
+				// 动图
+				target = html.match(/pixiv\.context\.ugokuIllustFullscreenData[\s]*=[\s]*\{[^}]*\"src\"[\s]*:[\s]*\"((http|https):[\\\/]*[\w\d\.]*pixiv\.net(.*)\/(\d+)_ugoira(\d+)x(\d+)\.zip)\"/);
+				if (target && target[1]) {
+					result[0] = target[1].replace(/\\(.)/gi, '$1');
+				}
+				console.debug("动图", result);
+			} else if (-1 !== target[2].indexOf("manga")) {
+				// 多图（伪）
+				result.push(1);
+				result.push(url.replace(/medium/, "big"));
+				// http://www.pixiv.net/member_illust.php?mode=big&illust_id=53517282
+				// 这个链接直接打开会被302导致失败
+				// 需要设置 Referer
+				console.debug("多图（伪）", result);
+				// console.log(target);
+			} else {
+				// 未知
+				console.error("错误：未知类型", target);
+			}
+		} else {
+			// 不行再靠老一套
+			target = html.match(/<img\s+alt=\"[^\"]*\".*data-src=\"([^\"]*)\".*class=\"original-image\">/);
+			if (target && target[1]) {
+				// 单图
+				result[0] = target[1];
+				console.debug("单图", result);
+			} else if (-1 !== html.indexOf("multiple") && (target = html.match(/<ul class=\"meta\"><li>[^<>]*<\/li><li>[^<>\d]*(\d+)P<\/li>/)) && target && target[1]) {
+				// 根据 meta 判断遇到作者使用多图模式发表单张图片会失败
+				// meta === "一次性投稿多张作品 "(\d+)"P"
+				// 多图
+				// http://www.pixiv.net/member_illust.php?mode=manga_big&illust_id=xxxxxxxx&page=0
+				let count = parseInt(target[1]);
+				result.push(count);
+				for (let i = 0; i < count; i++) {
+					let link = url.replace(/medium/, "manga_big");
+					link = `${link}&page=${i}`;
+					result.push(link);
+				}
+				console.debug("多图", result, target);
+			} else if (html.match(/manga/gi).length > 1) {
+				// 多图模式的单图
+				result.push(1);
+				result.push(url.replace(/medium/, "big"));
+				// http://www.pixiv.net/member_illust.php?mode=big&illust_id=53517282
+				// 这个链接直接打开会被302导致失败
+				// 需要设置 Referer
+				console.debug("多图模式的单图", result, target);
+			} else if (-1 !==html.indexOf("ugoira_view") && (target = html.match(/pixiv\.context\.ugokuIllustFullscreenData[\s]*=[\s]*\{[^}]*\"src\"[\s]*:[\s]*\"((http|https):[\\\/]*[\w\d\.]*pixiv\.net(.*)\/(\d+)_ugoira(\d+)x(\d+)\.zip)\"/)) && target && target[1]) {
+				// 动图
+				// http://www.pixiv.net/member_illust.php?mode=medium&illust_id=xxxxxxxx
+				result[0] = target[1].replace(/\\(.)/gi, '$1');
+				console.debug("动图", result[0]);
+			} else {
+				console.error("错误：未知类型", target);
+			}
 		}
 
 		// console.groupEnd();
@@ -540,20 +652,19 @@
 	};
 
 	// 提取选定的原图
-	var extractWorkList = function () {
+	var extractWorkList = function (url) {
 		// console.group("开始提取");
 		var exportImages = function () {
 			if (result.isAllDone()) {
-				var i,
-				info,
+				var info,
 				arr,
 				res = result.exportAll();
 
 				// console.debug("已采集原图:", res.done);
-				// console.debug("提取失败: ", res.fail);
+				console.debug("提取失败: ", res.fail);
 				info = "搞到 " + res.done.length + " 张图啦 （⺻▽⺻ ）";
 				arr = result.getID();
-				for (i = res.fail.length - 1; i >= 0; i--) {
+				for (let i = res.fail.length - 1; i >= 0; i--) {
 					if (0 === res.fail[i]) {
 						arr.splice(i, 1);
 					}
@@ -567,32 +678,29 @@
 		};
 
 		var recordFails = function (illustId, status) {
-			// console.error(illustId, "提取失败", status);
+			console.error(illustId, "提取失败", status);
 			msg(illustId + "提取失败 (ಥ_ಥ) [http " + status + "]");
 			result.recordTargetLength(illustId, -1);
 			result.setTarget(illustId, null, 0, -1);
 		};
 
-		var i,
-		progress = 0,
-		result,
-		url = extractIllustUrl();
+		var progress = 0,
+		result;
 
 		if (0 === url.length) {
 			msg("至少选择一张图吧 ◔ ‸◔？");
 			// console.groupEnd();
 			return;
 		}
+		msg("正在赶工 (๑•̀_•́๑)");
 		// console.log("添加目标", url);
 		result = new illustCollector();
-		for (i = 0; i < url.length; i++) {
+		for (let i = 0; i < url.length; i++) {
 			result.addTarget(url[i].replace(/.*illust_id=(\d+).*/, "$1"));
 		}
 		fetchPageContent(url,
 			window.location.origin,
 			function (illustId, xhr) {
-				var i,
-				target;
 				// console.group("得到页面", illustId, ", 开始解析", illustId == xhr.finalUrl.replace(/.*illust_id=(\d+).*/, "$1"));
 				progress++;
 				msg("进度" + progress + "/" + url.length + " (ฅ´ω`ฅ)");
@@ -600,28 +708,34 @@
 
 				if (200 === xhr.status) {
 					// 解析页面取得原图链接(单图和动图)或新的目标页面链接(多图)
-					target = parseWorkPage(xhr.responseText, xhr.finalUrl);
+					let target = parseWorkPage(xhr.responseText, xhr.finalUrl);
 					if (target) {
 						// 记录原图数量
 						if (1 === target.length) {
 							result.recordTargetLength(illustId, 1);
 							// 单图和动图可立即取得原图链接,那就顺手录入,并标记为已完成
-							i = result.setTarget(illustId, target[0], 0, 1);
-							// msg("到手" + parsed + "页，就剩" + (url.length - parsed) + "页啦 (ฅ´ω`ฅ)");
+							let i = result.setTarget(illustId, target[0], 0, 1);
 							// console.log("记录单图或动图", i);
+							// msg("到手" + parsed + "页，就剩" + (url.length - parsed) + "页啦 (ฅ´ω`ฅ)");
 						} else {
-							result.recordTargetLength(illustId, target[0]);
+							var count = target.shift();
+							result.recordTargetLength(illustId, count);
 							// 多图需要再次解析链接
 							// console.warn("多图需要再次解析链接", target);
-							for (i = 0; i < target[0]; i++) {
-								result.setTarget(illustId, target[1] + i, i, 0);
-								// console.log(target[1] + i);
+							if (1 === count && 1 === target.length) { // 伪多图
+								result.setTarget(illustId, target[0], 0, 0);
+								// console.warn("伪多图", target[0]);
+							} else {
+								for (let i = 0; i < count; i++) {
+									result.setTarget(illustId, target[i], i, 0);
+									// console.log(target[i]);
+								}
 							}
-							parseMultiImageUrl(target[0], target[1], function (obj) {
-								// console.warn("parseMultiImageUrl:callback", obj);
-								// console.log("搞到这 ", target[0], " 张图啦 （⺻▽⺻ ）");
-								for (var i = 0; i < target[0]; i++) {
-									var status = (undefined !== obj.done[i] && undefined === obj.fail[i]) ? 1 : -1;
+							parseMultiImageUrl(target, function (obj) {
+								// console.warn("n:callback", obj);
+								// console.log("搞完这 ", count, " 张图啦 （⺻▽⺻ ）");
+								for (let i = 0; i < count; i++) {
+									let status = (undefined !== obj.done[i] && undefined === obj.fail[i]) ? 1 : -1;
 									result.setTarget(illustId, obj.done[i], i, status);
 								}
 								exportImages();
@@ -644,19 +758,19 @@
 				recordFails(illustId, xhr.status);
 				exportImages();
 				// console.groupEnd();
-		});
+			},
+			window.location.href
+		);
 		// console.groupEnd();
 	};
 
 	// 添加按钮
 	var addButtonWorkList = function () {
-		var i,
-		button,
-		menu,
-		itemList = $class("_image-items");
+		var itemList = $class("_image-items");
 
 		if (itemList) {
-			menu = $class('menu-items')[0];
+			let button,
+			menu = $class('menu-items');
 
 			// 全选按钮
 			button = document.createElement('li');
@@ -678,28 +792,28 @@
 			button = document.createElement('li');
 			button.innerHTML="<a href='javascript:;'>收割 ๑乛◡乛๑ (●´∀｀●)</a><span id='extracted'></span>";
 			button.addEventListener("click", function () {
-				extractWorkList();
+				extractWorkList(extractIllustUrl());
 			});
 			menu.appendChild(button);
 
 			// 添加复选框
 			addStyle();
-			for (i = 0; i < itemList[0].children.length; i++) {
+			for (let i = 0; i < itemList.children.length; i++) {
 				button = document.createElement('input');
 				button.type = "checkbox";
 				button.className = "cmheia_checkbox";
 				button.checked = !0;
 				// a
 				// 删除原先的链接
-				itemList[0].children[i].children[0].removeAttribute('href');
+				itemList.children[i].children[0].removeAttribute('href');
 				// 增加背景
-				itemList[0].children[i].children[0].setAttribute('style', 'margin-bottom:0;');
-				addClassName(itemList[0].children[i].children[0], 'cmheia_item');
-				// addClassName(itemList[0].children[i].children[0], 'cmheia_item_unselect');
+				itemList.children[i].children[0].setAttribute('style', 'margin-bottom:0;');
+				addClassName(itemList.children[i].children[0], 'cmheia_item');
+				// addClassName(itemList.children[i].children[0], 'cmheia_item_unselect');
 				// div
 				// 增加点击事件
-				itemList[0].children[i].children[0].children[0].appendChild(button);
-				itemList[0].children[i].children[0].children[0].addEventListener("click", function (e) {
+				itemList.children[i].children[0].children[0].appendChild(button);
+				itemList.children[i].children[0].children[0].addEventListener("click", function (e) {
 					// 点击图片切换选中状态
 					this.children[1].checked = !this.children[1].checked;
 					toggleClassName(this.parentNode, 'cmheia_item_unselect');
@@ -713,83 +827,10 @@
 	 **********************************************************************/
 	// 移除分享按钮
 	var removeShareButton = function () {
-		var i,
-		shareButton = $class('share-button')[0],
-		count = shareButton.childNodes.length;
-		for (i = 0; i < count; i++) {
-			shareButton.removeChild(shareButton.childNodes[0]);
-		}
-	};
-
-	// 取得图集信息
-	// return: -1 -> 分析失败, 0 ->单图, > 0 -> 多图
-	var isMulti = function () {
-		// 单图特征: thumbnail === "DIV" && albumMeta === (\d+)×(\d+)
-		// 多图特征: thumbnail === "A" && albumMeta === "一次性投稿多张作品 "(\d+)"P"
-		// 多图特征: thumbnail === "A" && albumMeta === "複数枚投稿 "(\d+)"P"
-		// 多图特征: thumbnail === "A" && albumMeta === "Multiple images: "(\d+)"P"
-		// 多图特征: thumbnail === "A" && albumMeta === "여러 장 투고 "(\d+)"P"
-		/*
-		var a,
-		albumMeta = $class('meta')[0].childNodes[1].innerHTML;
-
-		if ("A" === $class('works_display')[0].childNodes[0].nodeName) {
-			a = albumMeta.match(/(\d+)/gi);
-			if (null !== a) {
-				return parseInt(a[0]);
-			} else {
-				return -1;
-			}
-		} else {
-			if (albumMeta.match(/(\d+)×(\d+)/gi)) {
-				return 0;
-			} else {
-				return -1;
-			}
-		}
-		return -1;
-		*/
-
-		// 单图特征: html 中包含字符串 "original-image"
-		// 多图特征: html 中包含字符串 "multiple"
-		var result = -1;
-		if ($class('works_display')[0].innerHTML.indexOf("multiple") > -1) {
-			// 多图
-			try {
-				result = parseInt($class('meta')[0].children[1].innerHTML.match(/(\d+)/gi));
-			} catch (e) {
-				// console.error("看似多图却不能发现有几图,实属不该");
-			}
-		} else {
-			// 单图
-			result = 0;
-		}
-		return result;
-	};
-
-	// 导出原图链接
-	var extractWorkPage = function () {
-		var illustType = isMulti();
-		if (0 === illustType) {
-			var result = parseImageUrl($class('original-image')[0].getAttribute("data-src"));
-			if (null !== result) {
-				msg("搞到这张图啦 （⺻▽⺻ ）");
-				GM_setClipboard(result);
-			} else {
-				msg("然而并不能收割 (╯#-_-)╯~~~~~~~~~~~~~~~~~╧═╧");
-			}
-		} else if (0 < illustType) {
-			if (0 === parseMultiImageUrl(illustType, window.location.href.replace(/medium/, "manga_big") + "&page=", function (result) {
-					// console.log("parseMultiImageUrl:done!");
-					msg("搞到这 " + illustType + " 张图啦 （⺻▽⺻ ）");
-					GM_setClipboard(result.done.join("\r\n"));
-			})) {
-				msg("然而并不能收割 (╯#-_-)╯~~~~~~~~~~~~~~~~~╧═╧");
-			} else {
-				msg("正在搞这 " + illustType + " 张图，不要急嘛 (๑•̀_•́๑)");
-			}
-		} else {
-			msg("P站又改版了 (╯#-_-)╯~~~~~~~~~~~~~~~~~╧═╧");
+		var shareButton = $class('share-button'),
+		count = shareButton.children.length;
+		for (let i = 0; i < count; i++) {
+			shareButton.removeChild(shareButton.children[0]);
 		}
 	};
 
@@ -798,28 +839,37 @@
 		var button = document.createElement('li');
 		button.innerHTML="<a href='javascript:;' style='margin:0 8px;'>收割 ๑乛◡乛๑ (●´∀｀●)</a><span id='extracted'></span>";
 		button.addEventListener("click", function () {
-			extractWorkPage();
+			extractWorkList([window.location.pathname + window.location.search]);
 		});
-		$class('share-button')[0].appendChild(button);
+		$class('share-button').appendChild(button);
 	};
 
 	// 运行
 	// console.warn("P站原图收割机：开始");
 	if (isWorksList()) {
-		addButtonWorkList();
-		document.addEventListener("keyup", function (event) {
-			// F9 = 120
-			if (120 === event.keyCode ) {
-				extractWorkList();
+		let itemList = $class("_image-items");
+
+		if (itemList) {
+			if (1 === itemList.children.length && "" === itemList.children[0].className) {
+				// <li>未找到任何相关结果</li>
+				console.debug("未找到任何相关结果");
+			} else {
+				addButtonWorkList();
+				document.addEventListener("keyup", function (event) {
+					// F9 = 120
+					if (120 === event.keyCode ) {
+						extractWorkList(extractIllustUrl());
+					}
+				}, true);
 			}
-		}, true);
+		}
 	} else {
 		removeShareButton();
 		addButtonWorkPage();
 		document.addEventListener("keyup", function (event) {
 			// F9 = 120
 			if (120 === event.keyCode) {
-				extractWorkPage();
+				extractWorkList([window.location.pathname + window.location.search]);
 			}
 		}, true);
 	}
