@@ -5,7 +5,7 @@
 // @description Adds a button that get all attached images as original size to every post.
 // @include     http://www.pixiv.net/member_illust.php*
 // @author      cmheia
-// @version     1.1.0
+// @version     1.1.1
 // @icon        http://www.pixiv.net/favicon.ico
 // @grant       GM_setClipboard
 // @grant       GM_xmlhttpRequest
@@ -435,8 +435,9 @@
 		itemList = $class('_image-items').children;
 
 		if (itemList) {
+			let offset = itemList[0].children[0].children[0].children.length - 1;
 			for (let i = 0; i < itemList.length; i++) {
-				if (itemList[i].children[0].children[0].children[1].checked) {
+				if (itemList[i].children[0].children[0].children[offset].checked) {
 					let href = itemList[i].children[1].getAttribute('href');
 					if (href && href.match(/.*illust_id=(\d+).*/)) {
 						// id.push(href.replace(/.*illust_id=(\d+).*/, "$1") || "");
