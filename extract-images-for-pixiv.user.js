@@ -5,7 +5,7 @@
 // @description Adds a button that get all attached images as original size to every post.
 // @include     http://www.pixiv.net/member_illust.php*
 // @author      cmheia
-// @version     1.1.1
+// @version     1.2.0
 // @icon        http://www.pixiv.net/favicon.ico
 // @grant       GM_setClipboard
 // @grant       GM_xmlhttpRequest
@@ -352,10 +352,10 @@
 		userId = window.location.search.match(/[^_]id=(\d+)/);
 		workId = window.location.search.match(/illust_id=(\d+)/);
 		if (userId) {
-			console.debug("作品目录,USER ID:", userId[1]);
+			// console.log("作品目录,USER ID:", userId[1]);
 		}
 		if (workId) {
-			console.debug("作品页面,WORK ID:", workId[1]);
+			// console.log("作品页面,WORK ID:", workId[1]);
 		}
 		// console.groupEnd();
 		return null !== userId && null === workId;
@@ -436,7 +436,9 @@
 
 		if (itemList) {
 			let offset = itemList[0].children[0].children[0].children.length - 1;
+			// console.log("offset", offset);
 			for (let i = 0; i < itemList.length; i++) {
+				// console.log(itemList[i].children[0].children[0].children);
 				if (itemList[i].children[0].children[0].children[offset].checked) {
 					let href = itemList[i].children[1].getAttribute('href');
 					if (href && href.match(/.*illust_id=(\d+).*/)) {
@@ -574,7 +576,7 @@
 				if (target && target[1]) {
 					result.push(target[1]);
 				}
-				console.debug("单图", result);
+				// console.log("单图", result);
 				// console.log(target);
 			} else if (-1 !== target[2].indexOf("multiple")) {
 				// 多图（真）
@@ -588,7 +590,7 @@
 						result.push(link);
 					}
 				}
-				console.debug("多图（真）", result);
+				// console.log("多图（真）", result);
 				// console.log(target);
 			} else if (-1 !== target[2].indexOf("_ugoku")) {
 				// 动图
@@ -596,7 +598,7 @@
 				if (target && target[1]) {
 					result[0] = target[1].replace(/\\(.)/gi, '$1');
 				}
-				console.debug("动图", result);
+				// console.log("动图", result);
 			} else if (-1 !== target[2].indexOf("manga")) {
 				// 多图（伪）
 				result.push(1);
@@ -604,11 +606,11 @@
 				// http://www.pixiv.net/member_illust.php?mode=big&illust_id=53517282
 				// 这个链接直接打开会被302导致失败
 				// 需要设置 Referer
-				console.debug("多图（伪）", result);
+				// console.log("多图（伪）", result);
 				// console.log(target);
 			} else {
 				// 未知
-				console.error("错误：未知类型", target);
+				// console.error("错误：未知类型", target);
 			}
 		} else {
 			// 不行再靠老一套
@@ -616,7 +618,7 @@
 			if (target && target[1]) {
 				// 单图
 				result[0] = target[1];
-				console.debug("单图", result);
+				// console.log("单图", result);
 			} else if (-1 !== html.indexOf("multiple") && (target = html.match(/<ul class=\"meta\"><li>[^<>]*<\/li><li>[^<>\d]*(\d+)P<\/li>/)) && target && target[1]) {
 				// 根据 meta 判断遇到作者使用多图模式发表单张图片会失败
 				// meta === "一次性投稿多张作品 "(\d+)"P"
@@ -629,7 +631,7 @@
 					link = `${link}&page=${i}`;
 					result.push(link);
 				}
-				console.debug("多图", result, target);
+				// console.log("多图", result, target);
 			} else if (html.match(/manga/gi).length > 1) {
 				// 多图模式的单图
 				result.push(1);
@@ -637,14 +639,14 @@
 				// http://www.pixiv.net/member_illust.php?mode=big&illust_id=53517282
 				// 这个链接直接打开会被302导致失败
 				// 需要设置 Referer
-				console.debug("多图模式的单图", result, target);
+				// console.log("多图模式的单图", result, target);
 			} else if (-1 !==html.indexOf("ugoira_view") && (target = html.match(/pixiv\.context\.ugokuIllustFullscreenData[\s]*=[\s]*\{[^}]*\"src\"[\s]*:[\s]*\"((http|https):[\\\/]*[\w\d\.]*pixiv\.net(.*)\/(\d+)_ugoira(\d+)x(\d+)\.zip)\"/)) && target && target[1]) {
 				// 动图
 				// http://www.pixiv.net/member_illust.php?mode=medium&illust_id=xxxxxxxx
 				result[0] = target[1].replace(/\\(.)/gi, '$1');
-				console.debug("动图", result[0]);
+				// console.log("动图", result[0]);
 			} else {
-				console.error("错误：未知类型", target);
+				// console.error("错误：未知类型", target);
 			}
 		}
 
@@ -661,8 +663,8 @@
 				arr,
 				res = result.exportAll();
 
-				// console.debug("已采集原图:", res.done);
-				console.debug("提取失败: ", res.fail);
+				// console.log("已采集原图:", res.done);
+				// console.log("提取失败: ", res.fail);
 				info = "搞到 " + res.done.length + " 张图啦 （⺻▽⺻ ）";
 				arr = result.getID();
 				for (let i = res.fail.length - 1; i >= 0; i--) {
@@ -679,7 +681,7 @@
 		};
 
 		var recordFails = function (illustId, status) {
-			console.error(illustId, "提取失败", status);
+			// console.error(illustId, "提取失败", status);
 			msg(illustId + "提取失败 (ಥ_ಥ) [http " + status + "]");
 			result.recordTargetLength(illustId, -1);
 			result.setTarget(illustId, null, 0, -1);
@@ -767,6 +769,7 @@
 
 	// 添加按钮
 	var addButtonWorkList = function () {
+		// console.group("addButtonWorkList");
 		var itemList = $class("_image-items");
 
 		if (itemList) {
@@ -806,6 +809,7 @@
 				button.checked = !0;
 				// a
 				// 删除原先的链接
+				// // console.log(itemList.children[i].children[0]);
 				itemList.children[i].children[0].removeAttribute('href');
 				// 增加背景
 				itemList.children[i].children[0].setAttribute('style', 'margin-bottom:0;');
@@ -815,12 +819,14 @@
 				// 增加点击事件
 				itemList.children[i].children[0].children[0].appendChild(button);
 				itemList.children[i].children[0].children[0].addEventListener("click", function (e) {
+					let offset = this.children.length - 1;
 					// 点击图片切换选中状态
-					this.children[1].checked = !this.children[1].checked;
+					this.children[offset].checked = !this.children[offset].checked;
 					toggleClassName(this.parentNode, 'cmheia_item_unselect');
 				});
 			}
 		}
+		// console.groupEnd();
 	};
 
 	/**********************************************************************
@@ -845,26 +851,50 @@
 		$class('share-button').appendChild(button);
 	};
 
-	// 运行
-	// console.warn("P站原图收割机：开始");
-	if (isWorksList()) {
+	// 初始化作品列表界面
+	var postInitWorksListUI = function () {
 		let itemList = $class("_image-items");
 
 		if (itemList) {
 			if (1 === itemList.children.length && "" === itemList.children[0].className) {
 				// <li>未找到任何相关结果</li>
-				console.debug("未找到任何相关结果");
+				// console.log("未找到任何相关结果");
 			} else {
 				addButtonWorkList();
 				document.addEventListener("keyup", function (event) {
 					// F9 = 120
-					if (120 === event.keyCode ) {
+					if (120 === event.keyCode) {
 						extractWorkList(extractIllustUrl());
 					}
 				}, true);
 			}
 		}
-	} else {
+		console.warn("inited");
+	};
+
+	// 初始化作品列表界面
+	var initWorksListUI = function () {
+		var DOMObserverTimer = false;
+		var DOMObserverConfig = {
+			childList : true,
+			subtree   : true,
+		};
+		var DOMObserver = new MutationObserver(function () {
+				if (DOMObserverTimer !== 'false') {
+					clearTimeout(DOMObserverTimer);
+				}
+				DOMObserverTimer = setTimeout(function () {
+					if (!$id("extracted")) {
+						DOMObserver.disconnect();
+						postInitWorksListUI();
+					}
+				}, 100);
+			});
+		DOMObserver.observe(document.querySelector('.image-item'), DOMObserverConfig);
+	};
+
+	// 初始化作品界面
+	var initWorkPageUI = function () {
 		removeShareButton();
 		addButtonWorkPage();
 		document.addEventListener("keyup", function (event) {
@@ -873,5 +903,18 @@
 				extractWorkList([window.location.pathname + window.location.search]);
 			}
 		}, true);
-	}
+		console.warn("inited");
+	};
+
+	var initPEUI = function () {
+		if (isWorksList()) {
+			initWorksListUI();
+		} else {
+			initWorkPageUI();
+		}
+	};
+
+	// 运行
+	console.warn("P站原图收割机：开始");
+	initPEUI();
 }) ();
