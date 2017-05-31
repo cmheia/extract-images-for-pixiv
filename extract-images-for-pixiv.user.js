@@ -4,8 +4,9 @@
 // @namespace   https://github.com/cmheia/extract-images-for-pixiv
 // @description Adds a button that get all attached images as original size to every post.
 // @include     http://www.pixiv.net/member_illust.php*
+// @include     https://www.pixiv.net/member_illust.php*
 // @author      cmheia
-// @version     1.2.0
+// @version     1.2.1
 // @icon        http://www.pixiv.net/favicon.ico
 // @grant       GM_setClipboard
 // @grant       GM_xmlhttpRequest
@@ -834,7 +835,7 @@
 	 **********************************************************************/
 	// 移除分享按钮
 	var removeShareButton = function () {
-		var shareButton = $class('share-button'),
+		var shareButton = $class('share-link-container'),
 		count = shareButton.children.length;
 		for (let i = 0; i < count; i++) {
 			shareButton.removeChild(shareButton.children[0]);
@@ -848,7 +849,7 @@
 		button.addEventListener("click", function () {
 			extractWorkList([window.location.pathname + window.location.search]);
 		});
-		$class('share-button').appendChild(button);
+		$class('share-link-container').appendChild(button);
 	};
 
 	// 初始化作品列表界面
