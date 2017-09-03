@@ -6,7 +6,7 @@
 // @include     http://www.pixiv.net/member_illust.php*
 // @include     https://www.pixiv.net/member_illust.php*
 // @author      cmheia
-// @version     1.2.1
+// @version     1.3.0
 // @icon        http://www.pixiv.net/favicon.ico
 // @grant       GM_setClipboard
 // @grant       GM_xmlhttpRequest
@@ -595,7 +595,7 @@
 				// console.log(target);
 			} else if (-1 !== target[2].indexOf("_ugoku")) {
 				// 动图
-				target = html.match(/pixiv\.context\.ugokuIllustFullscreenData[\s]*=[\s]*\{[^}]*\"src\"[\s]*:[\s]*\"((http|https):[\\\/]*[\w\d\.]*pixiv\.net(.*)\/(\d+)_ugoira(\d+)x(\d+)\.zip)\"/);
+				target = html.match(/pixiv\.context\.ugokuIllustFullscreenData[\s]*=[\s]*\{[^}]*\"src\"[\s]*:[\s]*\"((http|https):[\\\/]*[\w\d\.]*pximg\.net(.*)\/(\d+)_ugoira(\d+)x(\d+)\.zip)\"/);
 				if (target && target[1]) {
 					result[0] = target[1].replace(/\\(.)/gi, '$1');
 				}
@@ -795,10 +795,15 @@
 
 			// 导出按钮
 			button = document.createElement('li');
-			button.innerHTML="<a href='javascript:;'>收割 ๑乛◡乛๑ (●´∀｀●)</a><span id='extracted'></span>";
+			button.innerHTML="<a href='javascript:;'>收割 ๑乛◡乛๑ (●´∀｀●)</a>";
 			button.addEventListener("click", function () {
 				extractWorkList(extractIllustUrl());
 			});
+			menu.appendChild(button);
+
+			// 消息显示区域
+			button = document.createElement('li');
+			button.innerHTML="<span id='extracted'></span>";
 			menu.appendChild(button);
 
 			// 添加复选框
@@ -810,7 +815,7 @@
 				button.checked = !0;
 				// a
 				// 删除原先的链接
-				// // console.log(itemList.children[i].children[0]);
+				// console.log(itemList.children[i].children[0]);
 				itemList.children[i].children[0].removeAttribute('href');
 				// 增加背景
 				itemList.children[i].children[0].setAttribute('style', 'margin-bottom:0;');
@@ -845,10 +850,14 @@
 	// 添加导出按钮
 	var addButtonWorkPage = function () {
 		var button = document.createElement('li');
-		button.innerHTML="<a href='javascript:;' style='margin:0 8px;'>收割 ๑乛◡乛๑ (●´∀｀●)</a><span id='extracted'></span>";
+		button.innerHTML="<a href='javascript:;' style='margin:0 8px;'>收割 ๑乛◡乛๑ (●´∀｀●)</a>";
 		button.addEventListener("click", function () {
 			extractWorkList([window.location.pathname + window.location.search]);
 		});
+		$class('share-link-container').appendChild(button);
+
+		button = document.createElement('li');
+		button.innerHTML="<span id='extracted'></span>";
 		$class('share-link-container').appendChild(button);
 	};
 
