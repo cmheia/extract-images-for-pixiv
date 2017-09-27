@@ -6,7 +6,7 @@
 // @include     http://www.pixiv.net/member_illust.php*
 // @include     https://www.pixiv.net/member_illust.php*
 // @author      cmheia
-// @version     1.3.0
+// @version     1.3.1
 // @icon        http://www.pixiv.net/favicon.ico
 // @grant       GM_setClipboard
 // @grant       GM_xmlhttpRequest
@@ -331,7 +331,7 @@
 
 	// 创建样式表
 	var addStyle = function () {
-		apendStyle(".cmheia_checkbox {position:absolute;left:0;} .cmheia_item {padding:1px 1px 7px;} .cmheia_item_unselect {background-color:pink;}");
+		apendStyle(".cmheia_checkbox {position:absolute;left:0;} .cmheia_item {padding:1px;} .cmheia_item_unselect {background-color:pink;}");
 	};
 
 	// 作品目录？
@@ -461,7 +461,9 @@
 
 		if (itemList) {
 			for (let i = 0; i < itemList.length; i++) {
-				itemList[i].children[0].children[0].children[1].checked = !0;
+				let index = itemList[i].children[0].children[0].children.length - 1;
+				let bt = itemList[i].children[0].children[0].children[index];
+				bt.checked = true;
 				removeClassName(itemList[i].children[0], 'cmheia_item_unselect');
 			}
 		}
@@ -475,8 +477,10 @@
 
 		if (itemList) {
 			for (let i = 0; i < itemList.length; i++) {
-				let x = itemList[i].children[0].children[0].children[1].checked;
-				itemList[i].children[0].children[0].children[1].checked = !x;
+				let index = itemList[i].children[0].children[0].children.length - 1;
+				let bt = itemList[i].children[0].children[0].children[index];
+				let x = bt.checked;
+				bt.checked = !x;
 				toggleClassName(itemList[i].children[0], 'cmheia_item_unselect');
 			}
 		}
@@ -812,11 +816,12 @@
 				button = document.createElement('input');
 				button.type = "checkbox";
 				button.className = "cmheia_checkbox";
-				button.checked = !0;
+				button.checked = true;
+				button.setAttribute('data-index', i);
 				// a
 				// 删除原先的链接
 				// console.log(itemList.children[i].children[0]);
-				itemList.children[i].children[0].removeAttribute('href');
+				itemList.children[i].children[0].setAttribute('href', '#');
 				// 增加背景
 				itemList.children[i].children[0].setAttribute('style', 'margin-bottom:0;');
 				addClassName(itemList.children[i].children[0], 'cmheia_item');
@@ -824,11 +829,15 @@
 				// div
 				// 增加点击事件
 				itemList.children[i].children[0].children[0].appendChild(button);
-				itemList.children[i].children[0].children[0].addEventListener("click", function (e) {
-					let offset = this.children.length - 1;
+				itemList.children[i].children[0].addEventListener("click", function (e) {
 					// 点击图片切换选中状态
-					this.children[offset].checked = !this.children[offset].checked;
-					toggleClassName(this.parentNode, 'cmheia_item_unselect');
+					let index = this.children[0].children.length - 1;
+					let bt = this.children[0].children[index];
+					// console.log(index);
+					// console.log(bt);
+					// console.log('点击图片切换' + (bt.checked ? '未' : '') + '选中状态');
+					bt.checked = !bt.checked;
+					toggleClassName(this, 'cmheia_item_unselect');
 				});
 			}
 		}
