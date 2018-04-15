@@ -6,7 +6,7 @@
 // @include     http://www.pixiv.net/member_illust.php*
 // @include     https://www.pixiv.net/member_illust.php*
 // @author      cmheia
-// @version     1.3.1
+// @version     1.3.2
 // @icon        http://www.pixiv.net/favicon.ico
 // @grant       GM_setClipboard
 // @grant       GM_xmlhttpRequest
@@ -436,11 +436,10 @@
 		itemList = $class('_image-items').children;
 
 		if (itemList) {
-			let offset = itemList[0].children[0].children[0].children.length - 1;
-			// console.log("offset", offset);
 			for (let i = 0; i < itemList.length; i++) {
-				// console.log(itemList[i].children[0].children[0].children);
-				if (itemList[i].children[0].children[0].children[offset].checked) {
+				let cmheia_checkbox = itemList[i].children[0].children[0].getElementsByTagName('input')[0];
+				// console.log(cmheia_checkbox);
+				if (cmheia_checkbox && cmheia_checkbox.checked) {
 					let href = itemList[i].children[1].getAttribute('href');
 					if (href && href.match(/.*illust_id=(\d+).*/)) {
 						// id.push(href.replace(/.*illust_id=(\d+).*/, "$1") || "");
